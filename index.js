@@ -64,6 +64,11 @@ app.use("/api/posts", postRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/comments", commentRoutes);
 
+// এইখানে root route দাও
+app.get("/", (req, res) => {
+  res.send("SnapSphere API is running! 🚀");
+});
+
 // Error handler (must be last)
 app.use(errorHandler);
 
