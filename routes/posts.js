@@ -4,7 +4,6 @@ const auth = require("../middleware/auth");
 const { uploadPostImage } = require("../middleware/upload");
 const catchAsync = require("../libs/catchAsync");
 const router = express.Router();
-
 // Get user's posts (current user)
 router.get("/user/me", auth, catchAsync(postController.getUserPosts));
 
@@ -18,7 +17,7 @@ router.get("/", catchAsync(postController.getPosts));
 router.post(
   "/",
   auth,
-  uploadPostImage.single("image"), // এখানে .single("image") দিতে হবে
+  uploadPostImage.single("image"),
   catchAsync(postController.createPost)
 );
 
@@ -29,7 +28,7 @@ router.post("/:id/like", auth, catchAsync(postController.toggleLike));
 router.patch(
   "/:id",
   auth,
-  uploadPostImage.single("image"), // এখানে .single("image") দিতে হবে
+  uploadPostImage.single("image"),
   catchAsync(postController.updatePost)
 );
 
