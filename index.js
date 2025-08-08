@@ -23,10 +23,9 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS.split(",") || [
-      "http://localhost:5173",
-      "https://snap-sphere-alpha.vercel.app",
-    ],
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",")
+      : ["http://localhost:5173", "https://snap-sphere-alpha.vercel.app"],
     credentials: true,
   })
 );
@@ -44,19 +43,18 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-// Cloudinary Configuration
+// Cloudinary config (if needed)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
 });
 
 // Routes
@@ -66,40 +64,10 @@ app.use("/api/posts", postRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/comments", commentRoutes);
 
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "healthy",
-    mongo: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-    cloudinary: !!cloudinary.config().cloud_name,
-  });
-});
-
-// Basic route
-app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to Snap Sphere API",
-    documentation: "https://your-docs-url.com",
-  });
-});
-
-// Error handling middleware
+// Error handler (must be last)
 app.use(errorHandler);
 
-// Handle unhandled rejections
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err);
-});
-
-// Start the server
-const server = app.listen(PORT, () => {
+// Start server
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
-
-// Handle SIGTERM for graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received. Shutting down gracefully");
-  server.close(() => {
-    console.log("Process terminated");
-  });
 });
